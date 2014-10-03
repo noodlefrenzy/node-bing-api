@@ -32,14 +32,15 @@ var should = require('should'),
     express = require('express'),
     http = require('http'),
     request = require('request'),
-    bing = require('../lib/bing');
+    bing = require('../lib/bing'),
+    qs = require('querystring');
 
 describe('Bing', function() {
     var server;
     var app;
     var port = 4321;
 
-    before(function (done) {
+    beforeEach(function (done) {
         app = express();
         server = http.createServer(app);
         server.listen.apply(server, [port,
@@ -52,7 +53,7 @@ describe('Bing', function() {
             }]);
     });
 
-    after(function (done) {
+    afterEach(function (done) {
         server.close();
         app = null;
         server = null;
@@ -81,6 +82,20 @@ describe('Bing', function() {
         bingClient.images('xbox', function (error, response, body) {
             response.statusCode.should.eql(500);
             body.should.eql(failure);
+            done();
+        });
+    });
+
+    it('should cope with invalid uri errors', function(done) {
+        // Invalid params come back as 200s with a string (non-JSON) body.
+        var failure = "Parameter market is not recognized.";
+        app.get('/hello/Image', function (req, res) {
+            res.status(200).send(failure);
+        });
+        var bingClient = bing({ rootUri: 'http://localhost:'+port+'/hello/', accKey: '123', additionalUriParams: 'market=en-us' });
+        bingClient.images('xbox', function (error, response, body) {
+            response.statusCode.should.eql(200);
+            error.should.eql(failure);
             done();
         });
     });

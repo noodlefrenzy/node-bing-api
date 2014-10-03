@@ -13,6 +13,7 @@
     "url": "https://github.com/goferito/node-bing-api/issues"
   },
   "dependencies": {
+    "debug": "^2.0.0",
     "request": "^2.44.0",
     "underscore": "^1.6.0"
   },
